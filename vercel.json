@@ -1,55 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "index.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "login.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "logout.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "profile.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "security.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "setup_admin.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "set_password.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "verify_otp.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "forgot_password.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "reset_password.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "request_access.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "admin/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "teacher/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "student/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "parent/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "accountant/*.php": {
+    "api/index.php": {
       "runtime": "vercel-php@0.7.4"
     }
   },
@@ -63,40 +15,8 @@
       "dest": "/uploads/$1"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "/admin/$1"
-    },
-    {
-      "src": "/teacher/(.*)",
-      "dest": "/teacher/$1"
-    },
-    {
-      "src": "/student/(.*)",
-      "dest": "/student/$1"
-    },
-    {
-      "src": "/parent/(.*)",
-      "dest": "/parent/$1"
-    },
-    {
-      "src": "/accountant/(.*)",
-      "dest": "/accountant/$1"
-    },
-    {
-      "src": "/(login|logout|profile|security|setup_admin|set_password|verify_otp|forgot_password|reset_password|request_access)",
-      "dest": "/$1.php"
-    },
-    {
-      "src": "/",
-      "dest": "/index.php"
-    },
-    {
-      "src": "/(.*\\.php)",
-      "dest": "/$1"
+      "src": "/(.*)",
+      "dest": "/api/index.php"
     }
   ]
 }
