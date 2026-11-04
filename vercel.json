@@ -4,7 +4,37 @@
     "api/**/*.php": {
       "runtime": "vercel-php@0.7.4"
     },
-    "*.php": {
+    "index.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "login.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "logout.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "profile.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "security.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "setup_admin.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "set_password.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "verify_otp.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "forgot_password.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "reset_password.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "request_access.php": {
       "runtime": "vercel-php@0.7.4"
     },
     "admin/*.php": {
