@@ -50,11 +50,22 @@ if ($uri === '/' || $uri === '/index' || $uri === '/index.php') {
     $targetScript = $localPath . '/index.php';
 }
 
-// 3. Execute the target PHP script
+// 3. Execute the target PHP script with full error handling
 if ($targetScript && file_exists($targetScript)) {
     // Preserve current working directory for relative includes
     chdir(dirname($targetScript));
-    require $targetScript;
+    try {
+        require $targetScript;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=UTF-8');
+        echo '<div style="font-family:sans-serif;max-width:800px;margin:50px auto;padding:25px;border:1px solid #ef4444;border-radius:8px;background:#fef2f2;color:#991b1b;">';
+        echo '<h2 style="margin-top:0;">CampusIQ Application Error</h2>';
+        echo '<p><strong>Message:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile(), ENT_QUOTES, 'UTF-8') . ' (Line ' . $e->getLine() . ')</p>';
+        echo '<pre style="background:#fee2e2;padding:12px;border-radius:4px;overflow:auto;font-size:12px;">' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES, 'UTF-8') . '</pre>';
+        echo '</div>';
+    }
     exit;
 }
 
