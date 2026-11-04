@@ -5,8 +5,11 @@
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $uri = '/' . ltrim($uri, '/');
 
-// 1. Serve static files directly if requested
-$localPath = __DIR__ . $uri;
+// 1. Project Root Directory
+$rootDir = dirname(__DIR__);
+
+// 2. Serve static files directly if requested
+$localPath = $rootDir . $uri;
 if ($uri !== '/' && file_exists($localPath) && !is_dir($localPath)) {
     $ext = strtolower(pathinfo($localPath, PATHINFO_EXTENSION));
     $mimeTypes = [
@@ -32,13 +35,13 @@ if ($uri !== '/' && file_exists($localPath) && !is_dir($localPath)) {
     }
 }
 
-// 2. Route resolution
+// 3. Route resolution
 $targetScript = null;
 
 if ($uri === '/' || $uri === '/index' || $uri === '/index.php') {
-    $targetScript = __DIR__ . '/index.php';
+    $targetScript = $rootDir . '/index.php';
 } elseif (preg_match('#^/(login|logout|profile|security|setup_admin|set_password|verify_otp|forgot_password|reset_password|request_access)(\.php)?$#', $uri, $matches)) {
-    $targetScript = __DIR__ . '/' . $matches[1] . '.php';
+    $targetScript = $rootDir . '/' . $matches[1] . '.php';
 } elseif (file_exists($localPath . '.php')) {
     $targetScript = $localPath . '.php';
 } elseif (file_exists($localPath) && is_file($localPath) && str_ends_with($localPath, '.php')) {
