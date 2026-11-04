@@ -1,0 +1,19 @@
+# CampusIQ Apache Configuration (InfinityFree Compatible)
+# ----------------------------------------------------
+
+# 1. Set default index file
+DirectoryIndex index.php index.html
+
+# 2. Block direct access to sensitive file types
+<FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op]|env|json|lock|git.*))$">
+    Deny from all
+</FilesMatch>
+
+# 3. Protect dot files and folders (.git, .env, etc.)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule "(^|/)\.(?!well-known)" - [F]
+</IfModule>
+
+# 4. Default Charset
+AddDefaultCharset UTF-8

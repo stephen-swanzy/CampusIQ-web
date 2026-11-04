@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "created_at": "2026-10-18T17:08:00Z",
+    "description": "Pristine baseline hashes and reference backups for CampusIQ hashing backend files",
+    "files": {
+        "includes/security.php": {
+            "baseline_file": "storage/security_baseline/security.php.baseline",
+            "sha256": "8BA10AAFB084E61B7E8B26ACAAB9A9BFC3DA39D93D2C618E52B2C453ABB82DAD",
+            "critical_functions": [
+                "campusPasswordPepper",
+                "campusEncryptionKey",
+                "campusPasswordHash",
+                "campusVerifyPassword",
+                "campusTotpCode",
+                "campusVerifyTotp",
+                "campusEncryptTotpSecret",
+                "campusDecryptTotpSecret"
+            ]
+        },
+        "includes/auth.php": {
+            "baseline_file": "storage/security_baseline/auth.php.baseline",
+            "sha256": "60FD34DE84DABE055BBDF194A6B48D4137BBE6EC291EA6109F28C616182288CB",
+            "critical_functions": [
+                "loginUser",
+                "currentUser",
+                "requireLogin",
+                "generateCsrfToken",
+                "verifyCsrfToken"
+            ]
+        }
+    }
+}

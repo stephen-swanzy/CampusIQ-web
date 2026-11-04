@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="CampusIQ logo">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#1e5ae6"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="22" fill="#edf4ff"/>
+  <path d="M30 84V48l30-18 30 18v36H30zm12-9h36V58L60 45 42 58v17zm6-6V64h24v5H48zm0 13v5h24v-5H48z" fill="url(#g)"/>
+</svg>

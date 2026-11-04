@@ -1,0 +1,10 @@
+.env
+.env.local
+.vercel
+node_modules/
+*.log
+cookies.txt
+storage/backups/
+campusiq-mobile/
+.DS_Store
+Thumbs.db
