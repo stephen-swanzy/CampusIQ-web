@@ -237,29 +237,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($hasEmail) {
                             // If an unexpired OTP was already generated recently, keep it to avoid race condition
                             $existingOtp = $user['email_otp'] ?? null;
-                            $existingExp = !empty($user['email_otp_expires_at']) ? strtotime($user['email_otp_expires_at']) : 0;
+                            // Always generate and deliver a fresh OTP code on sign-in attempt
+                            $otpCode = sprintf('%06d', random_int(100000, 999999));
+                            $expiresAt = date('Y-m-d H:i:s', time() + 900); // 15-minute validity
 
-                            if (!empty($existingOtp) && $existingExp > (time() + 300)) {
-                                $otpCode = (string) $existingOtp;
+                            $db->prepare('UPDATE users SET email_otp = :code, email_otp_expires_at = :expires, totp_failed_attempts = 0, totp_locked_until = NULL WHERE id = :id')
+                                ->execute(['code' => $otpCode, 'expires' => $expiresAt, 'id' => $user['id']]);
+
+                            $mailRes = sendCampusEmail(
+                                $user['email'],
+                                $user['name'],
+                                'CampusIQ Sign-In Verification Code: ' . $otpCode,
+                                buildOtpEmailHtml($user['name'], $otpCode, 15, 'Sign-In Verification')
+                            );
+
+                            if (!$mailRes['success']) {
+                                $error = 'Verification email failed: ' . ($mailRes['error'] ?: 'Please check your email configuration.');
                             } else {
-                                $otpCode = sprintf('%06d', random_int(100000, 999999));
-                                $expiresAt = date('Y-m-d H:i:s', time() + 900); // 15-minute validity
-
-                                $db->prepare('UPDATE users SET email_otp = :code, email_otp_expires_at = :expires, totp_failed_attempts = 0, totp_locked_until = NULL WHERE id = :id')
-                                    ->execute(['code' => $otpCode, 'expires' => $expiresAt, 'id' => $user['id']]);
-
-                                $mailRes = sendCampusEmail(
-                                    $user['email'],
-                                    $user['name'],
-                                    'CampusIQ Sign-In Verification Code: ' . $otpCode,
-                                    buildOtpEmailHtml($user['name'], $otpCode, 15, 'Sign-In Verification')
-                                );
-
-                                if (!$mailRes['success']) {
-                                    $error = 'Could not send verification email: ' . ($mailRes['error'] ?: 'Please check your mail configuration.');
-                                } else {
-                                    $success = 'A 6-digit verification code has been sent to your Gmail (' . e($user['email']) . ').';
-                                }
+                                $success = 'A fresh 6-digit verification code has been sent to your Gmail (' . e($user['email']) . ').';
                             }
 
                             $_SESSION['pending_2fa_otp'] = $otpCode;
