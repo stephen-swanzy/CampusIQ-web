@@ -216,17 +216,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     session_regenerate_id(true);
 
-                    // Determine if 2FA is needed for this account:
-                    $userEmailClean = strtolower(trim($user['email'] ?? ''));
+                    // Enforce 2-Step Authentication (Email OTP) for EVERY user on the system
                     $hasTotp = !empty($user['totp_enabled']) && !empty($user['totp_secret']);
-                    $hasRealEmail = !empty($userEmailClean) && !str_ends_with($userEmailClean, '@campusiq.edu.gh');
-
-                    // Enforce 2FA if:
-                    // 1. User has configured Google Authenticator (TOTP), OR
-                    // 2. User has a real email (e.g. @gmail.com) and 2fa_mode is not 'off', OR
-                    // 3. User explicitly has totp_enabled flag set
-                    $isEmail2FaAllowed = ($twoFaMode !== 'off');
-                    $needs2Fa = ($hasRealEmail && $isEmail2FaAllowed) || $hasTotp || (!empty($user['totp_enabled']) && $isEmail2FaAllowed);
+                    $hasEmail = !empty($userEmailClean) && filter_var($userEmailClean, FILTER_VALIDATE_EMAIL);
+                    $needs2Fa = true; // Mandatory 2FA for all users
 
                     if ($needs2Fa) {
                         $decryptedSecret = null;
@@ -238,8 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
 
-                        // Generate an Email OTP as well if the user has a real deliverable email
-                        if ($hasRealEmail) {
+                        // Generate and send an Email OTP to EVERY user
+                        if ($hasEmail) {
                             // If an unexpired OTP was already generated recently, keep it to avoid race condition
                             $existingOtp = $user['email_otp'] ?? null;
                             $existingExp = !empty($user['email_otp_expires_at']) ? strtotime($user['email_otp_expires_at']) : 0;
