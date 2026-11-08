@@ -11,7 +11,13 @@ class CampusBackupService
     public function __construct()
     {
         $this->db = getDb();
-        $this->storageDir = dirname(__DIR__) . '/storage/backups';
+        // Vercel serverless has a read-only filesystem except /tmp
+        $isServerless = is_dir('/tmp') && is_writable('/tmp') && !empty($_ENV['VERCEL']);
+        if ($isServerless || !is_writable(dirname(__DIR__) . '/storage')) {
+            $this->storageDir = '/tmp/backups';
+        } else {
+            $this->storageDir = dirname(__DIR__) . '/storage/backups';
+        }
         $this->ensureStorageDir();
     }
 
@@ -86,7 +92,12 @@ class CampusBackupService
      */
     public function dumpDatabase(string $targetFile): bool
     {
-        $handle = fopen($targetFile, 'w');
+        $dir = dirname($targetFile);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        $handle = @fopen($targetFile, 'w');
         if (!$handle) {
             return false;
         }
