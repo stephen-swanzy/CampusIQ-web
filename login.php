@@ -219,6 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     session_regenerate_id(true);
 
                     // Enforce 2-Step Authentication (Email OTP) for EVERY user on the system
+                    $userEmailClean = strtolower(trim($user['email'] ?? ''));
                     $hasTotp = !empty($user['totp_enabled']) && !empty($user['totp_secret']);
                     $hasEmail = !empty($userEmailClean) && filter_var($userEmailClean, FILTER_VALIDATE_EMAIL);
                     $needs2Fa = true; // Mandatory 2FA for all users
