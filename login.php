@@ -271,11 +271,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'has_totp' => $hasTotp,
                             'secret' => $decryptedSecret,
                             'email' => $user['email'],
-                            'has_real_email' => $hasRealEmail,
+                            'has_real_email' => $hasEmail,
                         ];
                         $_SESSION['pending_2fa_at'] = time();
 
-                        if (empty($error) && $hasRealEmail && empty($user['totp_secret'])) {
+                        if (empty($error) && $hasEmail && empty($user['totp_secret'])) {
                             $success = 'A 6-digit verification code has been sent to your Gmail (' . e($user['email']) . ').';
                         }
                     } else {
