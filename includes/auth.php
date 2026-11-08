@@ -4,10 +4,16 @@ require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/security.php';
 
 if (session_status() === PHP_SESSION_NONE) {
+    // Vercel serverless functions have a read-only filesystem except for /tmp
+    if (is_dir('/tmp') && is_writable('/tmp')) {
+        ini_set('session.save_path', '/tmp');
+    }
     ini_set('session.gc_maxlifetime', '604800');
     session_set_cookie_params([
         'lifetime' => 604800,
         'path' => '/',
+        'domain' => '',
+        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
         'httponly' => true,
         'samesite' => 'Lax'
     ]);

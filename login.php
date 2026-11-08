@@ -27,7 +27,9 @@ if (empty($cleanPhone)) {
 $whatsappUrl = "https://wa.me/{$cleanPhone}?text=" . urlencode("Hello, I need assistance logging into my CampusIQ account for " . ($school['school_name'] ?? 'the school') . ".");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verifyCsrfToken();
+    if (!verifyCsrfToken()) {
+        $error = 'Your session expired. Please enter your credentials and sign in again.';
+    } else {
 
     // 0. Cancel 2FA action
     if (!empty($_SESSION['pending_2fa_user']) && isset($_POST['action']) && $_POST['action'] === 'cancel_2fa') {
@@ -302,6 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Invalid email or password.';
             }
         }
+    }
     }
 }
 ?>

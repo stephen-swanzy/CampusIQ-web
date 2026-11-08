@@ -138,10 +138,12 @@ function csrfToken(): string
     return $_SESSION['csrf_token'];
 }
 
-function verifyCsrfToken(): void
+function verifyCsrfToken(): bool
 {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        http_response_code(419);
-        die('Security token validation failed. Please refresh and try again.');
+    if (!isset($_POST['csrf_token']) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        // Regenerate token for next attempt
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        return false;
     }
+    return true;
 }
