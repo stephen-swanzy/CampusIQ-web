@@ -8,6 +8,17 @@ require_once __DIR__ . '/../includes/backup_service.php';
 $backupService = new CampusBackupService();
 $backupService->checkAndRunScheduledBackup();
 
+require_once __DIR__ . '/../includes/security.php';
+$dashPepper = campusPasswordPepper();
+$dashSamplePw = 'Student@2024';
+$dashSampleHmac = hash_hmac('sha256', $dashSamplePw, $dashPepper);
+$dashSampleHash1 = campusPasswordHash($dashSamplePw);
+$dashSampleHash2 = campusPasswordHash($dashSamplePw);
+
+// Parse Bcrypt components
+$dashSalt1 = substr($dashSampleHash1, 7, 22);
+$dashSalt2 = substr($dashSampleHash2, 7, 22);
+
 require_once __DIR__ . '/../includes/header.php';
 
 $db = getDb();
@@ -366,7 +377,160 @@ for ($i = 5; $i >= 0; $i--) {
     </div>
 </div>
 
-<!-- 5. Real-Time Activity Log Table -->
+<!-- 5. Interactive Password Salt & Pepper Cryptographic Pipeline (Table Form) -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="fa-solid fa-graduation-cap me-1"></i> Assignment Mode</span>
+                <span class="badge bg-info text-dark fw-bold px-2 py-1"><i class="fa-solid fa-shield-halved me-1"></i> Cryptography Pipeline</span>
+            </div>
+            <h5 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-table-list text-primary me-2"></i>Password Salting &amp; Peppering Cryptographic Architecture</h5>
+            <small class="text-muted">Live inspection showing how plaintext passwords undergo HMAC-SHA256 peppering, per-user dynamic salting, and Bcrypt stretching</small>
+        </div>
+        <a href="security_demo.php" class="btn btn-outline-primary btn-sm px-3 shadow-sm bg-white">
+            <i class="fa-solid fa-sliders me-1"></i> Advanced Security Simulator
+        </a>
+    </div>
+
+    <!-- Live Cryptography Table -->
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 14%;"><i class="fa-solid fa-layer-group me-1"></i> Security Stage</th>
+                    <th style="width: 18%;"><i class="fa-solid fa-tag me-1"></i> Component Name</th>
+                    <th style="width: 46%;"><i class="fa-solid fa-code me-1"></i> Actual Value / Output String</th>
+                    <th style="width: 22%;"><i class="fa-solid fa-circle-info me-1"></i> Cryptographic Role &amp; Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1: Actual Plaintext Password -->
+                <tr>
+                    <td><span class="badge bg-secondary px-2 py-1 fw-bold">Stage 0</span></td>
+                    <td class="fw-bold text-dark">
+                        <i class="fa-solid fa-key text-danger me-1"></i> Actual Password
+                    </td>
+                    <td>
+                        <span class="font-monospace fw-bold text-danger fs-6 bg-light px-2 py-1 rounded border d-inline-block">
+                            <?php echo htmlspecialchars($dashSamplePw); ?>
+                        </span>
+                        <small class="text-muted ms-2">(Plaintext entered by user)</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-danger-subtle text-danger border border-danger">Memory Only</span>
+                        <small class="d-block text-muted mt-1">Never stored on disk or written to the database.</small>
+                    </td>
+                </tr>
+
+                <!-- Row 2: Application Secret Pepper -->
+                <tr class="table-info bg-opacity-10">
+                    <td><span class="badge bg-info text-dark px-2 py-1 fw-bold">Stage 1</span></td>
+                    <td class="fw-bold text-dark">
+                        <i class="fa-solid fa-pepper-hot text-danger me-1"></i> Secret Pepper
+                    </td>
+                    <td>
+                        <div class="font-monospace small text-secondary bg-white p-2 rounded border text-break">
+                            <?php echo htmlspecialchars($dashPepper); ?>
+                        </div>
+                        <small class="text-muted">Length: 64 hexadecimal characters (256-bit entropy)</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info">App Environment Only</span>
+                        <small class="d-block text-muted mt-1">Stored in server env; protected against SQL database dumps.</small>
+                    </td>
+                </tr>
+
+                <!-- Row 3: HMAC-SHA256 Peppered Hash -->
+                <tr>
+                    <td><span class="badge bg-info text-dark px-2 py-1 fw-bold">Stage 2</span></td>
+                    <td class="fw-bold text-dark">
+                        <i class="fa-solid fa-blender text-primary me-1"></i> Peppered HMAC-SHA256
+                    </td>
+                    <td>
+                        <div class="font-monospace small text-primary fw-semibold bg-light p-2 rounded border text-break">
+                            <?php echo htmlspecialchars($dashSampleHmac); ?>
+                        </div>
+                        <small class="text-muted"><code>hash_hmac('sha256', password, PEPPER)</code> &bull; Normalizes 72-byte Bcrypt limit</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary-subtle text-primary border border-primary">Pre-Hash Buffer</span>
+                        <small class="d-block text-muted mt-1">Intermediate digest feeding into Blowfish key expansion.</small>
+                    </td>
+                </tr>
+
+                <!-- Row 4: Unique Cryptographic Salt -->
+                <tr class="table-warning bg-opacity-10">
+                    <td><span class="badge bg-warning text-dark px-2 py-1 fw-bold">Stage 3</span></td>
+                    <td class="fw-bold text-dark">
+                        <i class="fa-solid fa-cube text-warning me-1"></i> Dynamic Cryptographic Salt
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="font-monospace fw-bold text-dark bg-warning bg-opacity-25 p-2 rounded border border-warning text-break fs-6">
+                                <?php echo htmlspecialchars($dashSalt1); ?>
+                            </span>
+                            <span class="badge bg-warning text-dark border">22 Base64 Characters</span>
+                        </div>
+                        <small class="text-muted">Generated freshly by CSPRNG (<code>random_bytes(16)</code>) per user/hash</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning-subtle text-dark border border-warning">Embedded in Hash</span>
+                        <small class="d-block text-muted mt-1">Neutralizes pre-computed Rainbow Tables and dictionary attacks.</small>
+                    </td>
+                </tr>
+
+                <!-- Row 5: Final Bcrypt Stored Hash -->
+                <tr class="table-success bg-opacity-10">
+                    <td><span class="badge bg-success px-2 py-1 fw-bold">Stage 4</span></td>
+                    <td class="fw-bold text-dark">
+                        <i class="fa-solid fa-lock text-success me-1"></i> Final Stored Hash
+                    </td>
+                    <td>
+                        <div class="font-monospace small text-success fw-bold bg-white p-2 rounded border border-success text-break fs-6 mb-2">
+                            <?php echo htmlspecialchars($dashSampleHash1); ?>
+                        </div>
+                        <!-- Anatomy of final string -->
+                        <div class="d-flex flex-wrap gap-1 font-monospace small">
+                            <span class="badge bg-dark" title="Algorithm">$2y$</span>
+                            <span class="badge bg-primary" title="Cost Factor">10$</span>
+                            <span class="badge bg-warning text-dark" title="Salt"><?php echo htmlspecialchars($dashSalt1); ?></span>
+                            <span class="badge bg-success" title="Checksum"><?php echo htmlspecialchars(substr($dashSampleHash1, 29)); ?></span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success">Saved in MySQL</span>
+                        <small class="d-block text-muted mt-1">Column: <code>users.password_hash</code> (60 chars)</small>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Live Rainbow Table Immunity Proof -->
+    <div class="p-3 bg-light rounded-3 border">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="fw-bold text-dark small"><i class="fa-solid fa-shield-virus text-warning me-1"></i> Rainbow Table Defense Proof (Same Password, 2 Different Salts &amp; Hashes):</span>
+            <span class="badge bg-dark font-monospace">Password = "<?php echo htmlspecialchars($dashSamplePw); ?>"</span>
+        </div>
+        <div class="row g-2 font-monospace small">
+            <div class="col-md-6">
+                <div class="p-2 bg-white rounded border">
+                    <span class="text-muted fw-bold d-block mb-1"><i class="fa-solid fa-fingerprint text-primary me-1"></i> Hash #1 (Salt A: <code><?php echo htmlspecialchars($dashSalt1); ?></code>):</span>
+                    <span class="text-primary text-break"><?php echo htmlspecialchars($dashSampleHash1); ?></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-2 bg-white rounded border">
+                    <span class="text-muted fw-bold d-block mb-1"><i class="fa-solid fa-fingerprint text-danger me-1"></i> Hash #2 (Salt B: <code><?php echo htmlspecialchars($dashSalt2); ?></code>):</span>
+                    <span class="text-danger text-break"><?php echo htmlspecialchars($dashSampleHash2); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Real-Time Activity Log Table -->
 <div class="card border-0 shadow-sm rounded-4 p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-2">
