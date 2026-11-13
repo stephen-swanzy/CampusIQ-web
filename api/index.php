@@ -2,6 +2,10 @@
 // Vercel Serverless Master Front-Controller for CampusIQ
 // Handles routing, clean URLs, and serving requests dynamically
 
+// Suppress raw warning/notice display in production output
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED);
+
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $uri = '/' . ltrim($uri, '/');
 

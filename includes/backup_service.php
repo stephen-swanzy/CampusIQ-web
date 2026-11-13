@@ -12,8 +12,15 @@ class CampusBackupService
     {
         $this->db = getDb();
         // Vercel serverless has a read-only filesystem except /tmp
-        $isServerless = is_dir('/tmp') && is_writable('/tmp') && !empty($_ENV['VERCEL']);
-        if ($isServerless || !is_writable(dirname(__DIR__) . '/storage')) {
+        $isServerless = (
+            getenv('VERCEL') !== false ||
+            isset($_SERVER['VERCEL']) ||
+            !empty($_ENV['VERCEL']) ||
+            getenv('AWS_LAMBDA_FUNCTION_NAME') !== false ||
+            is_dir('/var/task') ||
+            (is_dir('/tmp') && !is_writable(dirname(__DIR__) . '/storage'))
+        );
+        if ($isServerless) {
             $this->storageDir = '/tmp/backups';
         } else {
             $this->storageDir = dirname(__DIR__) . '/storage/backups';
@@ -211,8 +218,8 @@ class CampusBackupService
         if (function_exists('gzopen')) {
             $gzFilename = $rawSqlFilename . '.gz';
             $gzPath = $this->storageDir . '/' . $gzFilename;
-            $gz = gzopen($gzPath, 'w9');
-            $raw = fopen($rawSqlPath, 'r');
+            $gz = @gzopen($gzPath, 'w9');
+            $raw = @fopen($rawSqlPath, 'r');
             if ($gz && $raw) {
                 while (!feof($raw)) {
                     gzwrite($gz, fread($raw, 65536));

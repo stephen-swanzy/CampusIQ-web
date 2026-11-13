@@ -131,8 +131,33 @@ function getCurrentTermId(): ?int
 
 function csrfToken(): string
 {
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+
     if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        // Recover from cookie if available (e.g. across serverless container cold-starts)
+        if (!empty($_COOKIE['campusiq_csrf']) && strlen($_COOKIE['campusiq_csrf']) === 64) {
+            $_SESSION['csrf_token'] = $_COOKIE['campusiq_csrf'];
+        } else {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+    }
+
+    // Mirror to an HTTP-only secure cookie for serverless resilience
+    if (empty($_COOKIE['campusiq_csrf']) || $_COOKIE['campusiq_csrf'] !== $_SESSION['csrf_token']) {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+                    (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) ||
+                    (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+        @setcookie('campusiq_csrf', $_SESSION['csrf_token'], [
+            'expires' => time() + (86400 * 7),
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        $_COOKIE['campusiq_csrf'] = $_SESSION['csrf_token'];
     }
 
     return $_SESSION['csrf_token'];
@@ -140,10 +165,23 @@ function csrfToken(): string
 
 function verifyCsrfToken(): bool
 {
-    if (!isset($_POST['csrf_token']) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        // Regenerate token for next attempt
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+
+    $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (empty($token)) {
         return false;
     }
-    return true;
+
+    $validSession = !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    $validCookie  = !empty($_COOKIE['campusiq_csrf']) && hash_equals($_COOKIE['campusiq_csrf'], $token);
+
+    if ($validSession || $validCookie) {
+        $_SESSION['csrf_token'] = $token;
+        return true;
+    }
+
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    return false;
 }

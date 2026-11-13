@@ -4,9 +4,13 @@ require_once __DIR__ . '/../includes/auth.php';
 
 requireLogin(['super_admin', 'school_admin']);
 
-require_once __DIR__ . '/../includes/backup_service.php';
-$backupService = new CampusBackupService();
-$backupService->checkAndRunScheduledBackup();
+try {
+    require_once __DIR__ . '/../includes/backup_service.php';
+    $backupService = new CampusBackupService();
+    $backupService->checkAndRunScheduledBackup();
+} catch (\Throwable $e) {
+    error_log('Automated backup check skipped: ' . $e->getMessage());
+}
 
 require_once __DIR__ . '/../includes/security.php';
 $dashPepper = campusPasswordPepper();
