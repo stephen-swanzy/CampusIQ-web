@@ -14,7 +14,8 @@ try {
 
 require_once __DIR__ . '/../includes/security.php';
 $dashPepper = campusPasswordPepper();
-$dashSamplePw = 'Student@2024';
+$dashSamplePw = trim($_GET['test_password'] ?? 'Student@2024');
+if ($dashSamplePw === '') { $dashSamplePw = 'Student@2024'; }
 $dashSampleHmac = hash_hmac('sha256', $dashSamplePw, $dashPepper);
 $dashSampleHash1 = campusPasswordHash($dashSamplePw);
 $dashSampleHash2 = campusPasswordHash($dashSamplePw);
@@ -396,6 +397,30 @@ for ($i = 5; $i >= 0; $i--) {
             <i class="fa-solid fa-sliders me-1"></i> Advanced Security Simulator
         </a>
     </div>
+
+        <!-- Quick Live Password Tester for Assignment Demonstration -->
+    <form method="GET" action="index.php" class="row g-2 align-items-center mb-3 p-3 bg-light rounded-3 border">
+        <div class="col-auto">
+            <label class="fw-bold small text-dark mb-0"><i class="fa-solid fa-flask-vial text-primary me-1"></i> Test Live Password:</label>
+        </div>
+        <div class="col-sm-5 col-md-4">
+            <input type="text" name="test_password" class="form-control form-control-sm font-monospace fw-bold" value="<?php echo htmlspecialchars($dashSamplePw); ?>" placeholder="Type password here...">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold">
+                <i class="fa-solid fa-arrows-rotate me-1"></i> Update Table
+            </button>
+        </div>
+        <div class="col-auto d-flex flex-wrap gap-1 align-items-center">
+            <span class="text-muted small">Presets:</span>
+            <a href="index.php?test_password=Student%402024" class="badge bg-white text-primary border text-decoration-none py-1">Student@2024</a>
+            <a href="index.php?test_password=Admin%232026%21" class="badge bg-white text-dark border text-decoration-none py-1">Admin#2026!</a>
+            <a href="index.php?test_password=LecturerViva%2499" class="badge bg-white text-success border text-decoration-none py-1">LecturerViva$99</a>
+        </div>
+        <div class="col-auto ms-auto">
+            <span class="badge bg-danger text-white"><i class="fa-solid fa-lock me-1"></i> Admin Only</span>
+        </div>
+    </form>
 
     <!-- Live Cryptography Table -->
     <div class="table-responsive mb-4">
